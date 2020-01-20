@@ -32,6 +32,9 @@ uint8_t tool;
 /// the tool to be changed when we get an M6
 uint8_t next_tool;
 
+uint16_t strip;
+unsigned long last_inkjet;
+
 /************************************************************************//**
 
   \brief Processes command stored in global \ref next_target.
@@ -913,6 +916,46 @@ void process_gcode_command() {
 				serial_writestr_P(PSTR("Echo on\n"));
 				break;
       #endif /* DEBUG */
+
+
+		case 700:
+
+			if (next_target.seen_S){
+				
+				strip = next_target.S
+
+				while(last_inkjet + 800 > micros());
+
+				for(uint8_t i = 0; i <= 11; i++){
+
+              		//See if nozzle is set to fire
+              		if(strip & 1<<i){
+
+                	//Write the nozzle number to the pin shield as 4 bits
+                	if(i & 1<<0)
+                  		WRITE(INK_PINA, 1);
+                	if(i & 1<<1)
+                  		WRITE(INK_PINB, 1);
+                	if(i & 1<<2)
+                  		WRITE(INK_PINC, 1);
+                	if(i & 1<<3)
+                  		WRITE(INK_PIND, 1);
+
+                	//Fire the Nozzle
+                	digitalWrite(INK_PULSE, HIGH);
+                	delayMicroseconds(5);
+                	//Set everything low
+                	digitalWrite(INK_PULSE, LOW);
+
+                	WRITE(INK_PINA, 0);
+                	WRITE(INK_PINB, 0);
+                	WRITE(INK_PINC, 0);
+                	WRITE(INK_PIND, 0);
+              	}
+              	
+              	last_inkjet = micros();
+			}
+
 
 				// unknown mcode: spit an error
 			default:
