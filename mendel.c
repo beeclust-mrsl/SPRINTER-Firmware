@@ -30,22 +30,16 @@
 #endif
 
 #include	"config_wrapper.h"
-#include "cpu.h"
+#include  "cpu.h"
 #include	"serial.h"
 #include	"dda_queue.h"
 #include	"gcode_parse.h"
 #include	"timer.h"
-#include	"temp.h"
 #include	"watchdog.h"
 #include	"debug.h"
-#include	"heater.h"
-#include	"analog.h"
 #include	"pinio.h"
 #include	"clock.h"
-#include	"intercom.h"
-#include "spi.h"
-#include "sd.h"
-#include "display.h"
+#include  "inkjet.h"
 
 #ifdef SIMINFO
   #include "../simulavr/src/simulavr_info.h"
@@ -70,55 +64,15 @@
 void init(void) {
 
   cpu_init();
-
-	// set up watchdog
 	wd_init();
-
-	// set up serial
 	serial_init();
-
-	// set up G-code parsing
 	gcode_init();
-
-	// set up inputs and outputs
   pinio_init();
-
-  #ifdef SPI
-    spi_init();
-  #endif
-
-	// set up timers
 	timer_init();
-
-	heater_init();
-
-	// set up dda
 	dda_init();
-
-	// start up analog read interrupt loop,
-	// if any of the temp sensors in your config.h use analog interface
-	analog_init();
-
-	// set up temperature inputs
-	temp_init();
-
-  #ifdef SD
-    sd_init();
-  #endif
-
-	// enable interrupts
 	sei();
-
-	// reset watchdog
 	wd_reset();
-
-  // prepare the power supply
-  power_init();
-
-  #ifdef DISPLAY
-    display_init();
-    display_greeting();
-  #endif
+  inkjet_init();
 
 	// say hi to host
 	serial_writestr_P(PSTR("start\nok\n"));
@@ -173,18 +127,6 @@ int main (void)
           ack_waiting = 1;
         }
       }
-
-      #ifdef SD
-        if (( ! gcode_active || gcode_active & GCODE_SOURCE_SD) &&
-            gcode_sources & GCODE_SOURCE_SD) {
-          if (sd_read_gcode_line()) {
-            serial_writestr_P(PSTR("\nSD file done.\n"));
-            gcode_sources &= ! GCODE_SOURCE_SD;
-            // There is no pf_close(), subsequent reads will stick at EOF
-            // and return zeros.
-          }
-        }
-      #endif
 
       #ifdef CANNED_CYCLE
         /**

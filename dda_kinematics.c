@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 #include "dda_maths.h"
-#include "bed_leveling.h"
 
 void
 carthesian_to_carthesian(const TARGET *startpoint, const TARGET *target,

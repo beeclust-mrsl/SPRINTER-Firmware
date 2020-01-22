@@ -1,4 +1,3 @@
-#include "temp.h"
 #include "analog.h"
 #include "simulator.h"
 #include <stdio.h>

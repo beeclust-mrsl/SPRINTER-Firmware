@@ -1,6 +1,6 @@
-#include "pinio.h"
+#include "inkjet.h"
 
-void hpc6602_init()
+void inkjet_init()
 {
   
   #if defined(INK_PINA) && INK_PINA > -1

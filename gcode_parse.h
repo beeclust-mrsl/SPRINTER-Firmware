@@ -4,7 +4,6 @@
 #include	<stdint.h>
 
 #include	"dda.h"
-#include "sd.h"
 
 // whether to insist on N line numbers
 // if not defined, N's are completely ignored

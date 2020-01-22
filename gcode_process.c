@@ -14,8 +14,6 @@
 #include	"watchdog.h"
 #include	"delay.h"
 #include	"serial.h"
-#include	"temp.h"
-#include	"heater.h"
 #include	"timer.h"
 #include	"sersendf.h"
 #include	"pinio.h"
@@ -23,8 +21,6 @@
 #include	"clock.h"
 #include	"config_wrapper.h"
 #include	"home.h"
-#include "sd.h"
-#include "bed_leveling.h"
 
 /// the current tool
 uint8_t tool;
@@ -114,7 +110,7 @@ void process_gcode_command() {
 				//?
 				//? In this case move rapidly to X = 12 mm.  In fact, the RepRap firmware uses exactly the same code for rapid as it uses for controlled moves (see G1 below), as - for the RepRap machine - this is just as efficient as not doing so.  (The distinction comes from some old machine tools that used to move faster if the axes were not driven in a straight line.  For them G0 allowed any movement in space to get to the destination as fast as possible.)
 				//?
-        temp_wait();
+        		temp_wait();
 				backup_f = next_target.target.F;
 				next_target.target.F = MAXIMUM_FEEDRATE_X * 2L;
 				enqueue(&next_target.target);
@@ -128,7 +124,7 @@ void process_gcode_command() {
 				//?
 				//? Go in a straight line from the current (X, Y) point to the point (90.6, 13.8), extruding material as the move happens from the current extruded length to a length of 22.4 mm.
 				//?
-        temp_wait();
+        		temp_wait();
 				enqueue(&next_target.target);
 				break;
 
@@ -180,19 +176,15 @@ void process_gcode_command() {
 				//?
 				//? Example: G28
 				//?
-        //? This causes the RepRap machine to search for its X, Y and Z
-        //? endstops. It does so at high speed, so as to get there fast. When
-        //? it arrives it backs off slowly until the endstop is released again.
-        //? Backing off slowly ensures more accurate positioning.
-				//?
-        //? If you add axis characters, then just the axes specified will be
-        //? seached. Thus
-				//?
-        //?   G28 X Y72.3
-				//?
-        //? will zero the X and Y axes, but not Z. Coordinate values are
-        //? ignored.
-				//?
+        		//? This causes the RepRap machine to search for its X, Y and Z
+        		//? endstops. It does so at high speed, so as to get there fast. When
+        		//? it arrives it backs off slowly until the endstop is released again.
+        		//? Backing off slowly ensures more accurate positioning.
+        		//? If you add axis characters, then just the axes specified will be
+        		//? seached. Thus
+        		//?   G28 X Y72.3
+        		//? will zero the X and Y axes, but not Z. Coordinate values are
+        		//? ignored.
 
 				queue_wait();
 
@@ -213,10 +205,10 @@ void process_gcode_command() {
 					axisSelected = 1;
 				}
 				if (next_target.seen_Z) {
-          #if defined Z_MIN_PIN
-            home_z_negative();
-          #elif defined Z_MAX_PIN
-            home_z_positive();
+          			#if defined Z_MIN_PIN
+          			  home_z_negative();
+          			#elif defined Z_MAX_PIN
+          			  home_z_positive();
 					#endif
 					axisSelected = 1;
 				}
@@ -227,61 +219,63 @@ void process_gcode_command() {
 				}
 				break;
 
-#ifdef BED_LEVELING
-      case 29:
-        //? --- G29: Bed leveling registration ---
-        //?
-        //? Example: G29 S1
-        //?
-        //? Registers the Z-offset for a specific point on the print bed.
-        //? In this case the current position is used as the registration
-        //? point, but a different position can be specified by including
-        //? the X, Y and Z coordinate values.
-        //?
-        //? Three points must be registered before the dynamic bed leveling
-        //? feature is activated. Once three points are registered, the bed
-        //? is mapped assuming a flat plane and Z-offsets are adjusted
-        //? automatically during movements to follow the mapped plane. The
-        //? adjusted position is not displayed to the client, for example
-        //? in M114 results.
-        //?
-        //? The S value controls the action as follows:
-        //?   S0 displays the current bed leveling status
-        //?   S1 registers a new point on the 3-point plane mapping
-        //?   S5 clears all registered points and disables dynamic leveling
-        //?
-        //?   G29 S1 X100 Y50 Z-0.3
-        //?
-        //? This command registers the specific point 100,50 => -0.3
-        //?
-        //?   G29 S1
-        //?
-        //? This command registers the current head position as a point in
-        //? the plane map.
-        //?
+			#ifdef BED_LEVELING
+      		
+      			case 29:
+        			//? --- G29: Bed leveling registration ---
+        			//?
+        			//? Example: G29 S1
+        			//?
+        			//? Registers the Z-offset for a specific point on the print bed.
+        			//? In this case the current position is used as the registration
+        			//? point, but a different position can be specified by including
+        			//? the X, Y and Z coordinate values.
+        			//?
+        			//? Three points must be registered before the dynamic bed leveling
+        			//? feature is activated. Once three points are registered, the bed
+        			//? is mapped assuming a flat plane and Z-offsets are adjusted
+        			//? automatically during movements to follow the mapped plane. The
+        			//? adjusted position is not displayed to the client, for example
+        			//? in M114 results.
+        			//?
+        			//? The S value controls the action as follows:
+        			//?   S0 displays the current bed leveling status
+        			//?   S1 registers a new point on the 3-point plane mapping
+        			//?   S5 clears all registered points and disables dynamic leveling
+        			//?
+        			//?   G29 S1 X100 Y50 Z-0.3
+        			//?
+        			//? This command registers the specific point 100,50 => -0.3
+        			//?
+        			//?   G29 S1
+        			//?
+        			//? This command registers the current head position as a point in
+        			//? the plane map.
+        			//?
+			
+        			queue_wait();
+	
+	        		if (next_target.seen_S) {
+	        		  	switch (next_target.S) {
+	        		   		case 5:   // reset bed leveling registration points
+	        		     			bed_level_reset();
+	        		    			break;
+		
+		        	   		case 1:   // Register a new registration point
+		        	      		bed_level_register(next_target.target.axis[X], next_target.target.axis[Y], next_target.target.axis[Z]);
+		        	      		break;
+		
+		        	    	case 0:   // Report leveling status
+		        	      		bed_level_report();
+		        	      		break;
+		        	  	}
+	    	    	}
 
-        queue_wait();
+	        		// Restore position, ignoring any axes included in G29 cmd
+	        		next_target.target = startpoint;
+        			break;
 
-        if (next_target.seen_S) {
-          switch (next_target.S) {
-            case 5:   // reset bed leveling registration points
-              bed_level_reset();
-              break;
-
-            case 1:   // Register a new registration point
-              bed_level_register(next_target.target.axis[X], next_target.target.axis[Y], next_target.target.axis[Z]);
-              break;
-
-            case 0:   // Report leveling status
-              bed_level_report();
-              break;
-          }
-        }
-
-        // Restore position, ignoring any axes included in G29 cmd
-        next_target.target = startpoint;
-        break;
-#endif /* BED_LEVELING */
+			#endif /* BED_LEVELING */
 
 			case 90:
 				//? --- G90: Set to Absolute Positioning ---
@@ -324,27 +318,27 @@ void process_gcode_command() {
 				queue_wait();
 
 				if (next_target.seen_X) {
-          startpoint.axis[X] = next_target.target.axis[X];
+          			startpoint.axis[X] = next_target.target.axis[X];
 					axisSelected = 1;
 				}
 				if (next_target.seen_Y) {
-          startpoint.axis[Y] = next_target.target.axis[Y];
+          			startpoint.axis[Y] = next_target.target.axis[Y];
 					axisSelected = 1;
 				}
 				if (next_target.seen_Z) {
-          startpoint.axis[Z] = next_target.target.axis[Z];
+          			startpoint.axis[Z] = next_target.target.axis[Z];
 					axisSelected = 1;
 				}
 				if (next_target.seen_E) {
-          startpoint.axis[E] = next_target.target.axis[E];
+          			startpoint.axis[E] = next_target.target.axis[E];
 					axisSelected = 1;
 				}
 
 				if (axisSelected == 0) {
-          startpoint.axis[X] = next_target.target.axis[X] =
-          startpoint.axis[Y] = next_target.target.axis[Y] =
-          startpoint.axis[Z] = next_target.target.axis[Z] =
-          startpoint.axis[E] = next_target.target.axis[E] = 0;
+          			startpoint.axis[X] = next_target.target.axis[X] =
+          			startpoint.axis[Y] = next_target.target.axis[Y] =
+          			startpoint.axis[Z] = next_target.target.axis[Z] =
+          			startpoint.axis[E] = next_target.target.axis[E] = 0;
 				}
 
 				dda_new_startpoint();
@@ -355,18 +349,18 @@ void process_gcode_command() {
 				//?
 				//? Find the minimum limit of the specified axes by searching for the limit switch.
 				//?
-        #if defined X_MIN_PIN
-          if (next_target.seen_X)
-            home_x_negative();
-        #endif
-        #if defined Y_MIN_PIN
-          if (next_target.seen_Y)
-            home_y_negative();
-        #endif
-        #if defined Z_MIN_PIN
-          if (next_target.seen_Z)
-            home_z_negative();
-        #endif
+        		#if defined X_MIN_PIN
+        		  if (next_target.seen_X)
+        		    home_x_negative();
+        		#endif
+        		#if defined Y_MIN_PIN
+        		  if (next_target.seen_Y)
+        		    home_y_negative();
+        		#endif
+        		#if defined Z_MIN_PIN
+        		  if (next_target.seen_Z)
+        		    home_z_negative();
+        		#endif
 				break;
 
 			case 162:
@@ -374,21 +368,21 @@ void process_gcode_command() {
 				//?
 				//? Find the maximum limit of the specified axes by searching for the limit switch.
 				//?
-        #if defined X_MAX_PIN
-          if (next_target.seen_X)
-            home_x_positive();
-        #endif
-        #if defined Y_MAX_PIN
-          if (next_target.seen_Y)
-            home_y_positive();
-        #endif
-        #if defined Z_MAX_PIN
-          if (next_target.seen_Z)
-            home_z_positive();
-        #endif
+        		#if defined X_MAX_PIN
+        		  if (next_target.seen_X)
+        		    home_x_positive();
+        		#endif
+        		#if defined Y_MAX_PIN
+        		  if (next_target.seen_Y)
+        		    home_y_positive();
+        		#endif
+        		#if defined Z_MAX_PIN
+        		  if (next_target.seen_Z)
+        		    home_z_positive();
+        		#endif
 				break;
 
-				// unknown gcode: spit an error
+			// unknown gcode: spit an error
 			default:
 				sersendf_P(PSTR("E: Bad G-code %d\n"), next_target.G);
 				return;
@@ -408,7 +402,7 @@ void process_gcode_command() {
 				//?
 
 			case 2:
-      case 84: // For compatibility with slic3rs default end G-code.
+			case 84:
 				//? --- M2: program end ---
 				//?
 				//? Example: M2
@@ -416,10 +410,8 @@ void process_gcode_command() {
 				//? http://linuxcnc.org/handbook/RS274NGC_3/RS274NGC_33a.html#1002379
 				//?
 				queue_wait();
-				for (i = 0; i < NUM_HEATERS; i++)
-					temp_set(i, 0);
 				power_off();
-        serial_writestr_P(PSTR("\nstop\n"));
+        		serial_writestr_P(PSTR("\nstop\n"));
 				break;
 
 			case 6:
@@ -429,54 +421,54 @@ void process_gcode_command() {
 				tool = next_tool;
 				break;
 
-      #ifdef SD
-      case 20:
-        //? --- M20: list SD card. ---
-        sd_list("/");
-        break;
+      		#ifdef SD
+      			case 20:
+      		  		//? --- M20: list SD card. ---
+      		  		sd_list("/");
+      		  		break;
+		
+		      	case 21:
+		      		//? --- M21: initialise SD card. ---
+		      		//?
+		      		//? Has to be done before doing any other operation, including M20.
+		      		sd_mount();
+		      		break;
+		
+      			case 22:
+        			//? --- M22: release SD card. ---
+        			//?
+        			//? Not mandatory. Just removing the card is fine, but results in
+        			//? odd behaviour when trying to read from the card anyways. M22
+        			//? makes also sure SD card printing is disabled, even with the card
+        			//? inserted.
+        			sd_unmount();
+        			break;
 
-      case 21:
-        //? --- M21: initialise SD card. ---
-        //?
-        //? Has to be done before doing any other operation, including M20.
-        sd_mount();
-        break;
+      			case 23:
+        			//? --- M23: select file. ---
+        			//?
+        			//? This opens a file for reading. This file is valid up to M22 or up
+        			//? to the next M23.
+        			sd_open(gcode_str_buf);
+        			break;
 
-      case 22:
-        //? --- M22: release SD card. ---
-        //?
-        //? Not mandatory. Just removing the card is fine, but results in
-        //? odd behaviour when trying to read from the card anyways. M22
-        //? makes also sure SD card printing is disabled, even with the card
-        //? inserted.
-        sd_unmount();
-        break;
-
-      case 23:
-        //? --- M23: select file. ---
-        //?
-        //? This opens a file for reading. This file is valid up to M22 or up
-        //? to the next M23.
-        sd_open(gcode_str_buf);
-        break;
-
-      case 24:
-        //? --- M24: start/resume SD print. ---
-        //?
-        //? This makes the SD card available as a G-code source. File is the
-        //? one selected with M23.
-        gcode_sources |= GCODE_SOURCE_SD;
-        break;
-
-      case 25:
-        //? --- M25: pause SD print. ---
-        //?
-        //? This removes the SD card from the bitfield of available G-code
-        //? sources. The file is kept open. The position inside the file
-        //? is kept as well, to allow resuming.
-        gcode_sources &= ! GCODE_SOURCE_SD;
-        break;
-      #endif /* SD */
+      			case 24:
+      				//? --- M24: start/resume SD print. ---
+      				//?
+      				//? This makes the SD card available as a G-code source. File is the
+      				//? one selected with M23.
+      				gcode_sources |= GCODE_SOURCE_SD;
+      				break;
+			
+			    case 25:
+			    	//? --- M25: pause SD print. ---
+			    	//?
+			    	//? This removes the SD card from the bitfield of available G-code
+			    	//? sources. The file is kept open. The position inside the file
+			    	//? is kept as well, to allow resuming.
+      				gcode_sources &= ! GCODE_SOURCE_SD;
+        			break;
+      		#endif /* SD */
 
 			case 82:
 				//? --- M82 - Set E codes absolute ---
@@ -509,7 +501,7 @@ void process_gcode_command() {
 				//? --- M101: extruder on ---
 				//?
 				//? Undocumented.
-        temp_wait();
+        		temp_wait();
 				#ifdef DC_EXTRUDER
 					heater_set(DC_EXTRUDER, DC_EXTRUDER_PWM);
 				#endif
@@ -531,43 +523,45 @@ void process_gcode_command() {
 				//?
 				//? Example: M104 S190
 				//?
-        //? Set the temperature of the current extruder to 190<sup>o</sup>C
-        //? and return control to the host immediately (''i.e.'' before that
-        //? temperature has been reached by the extruder). For waiting, see M116.
-        //?
-        //? Teacup supports an optional P parameter as a zero-based temperature
-        //? sensor index to address (e.g. M104 P1 S100 will set the temperature
-        //? of the heater connected to the second temperature sensor rather
-        //? than the extruder temperature).
-        //?
+        		//? Set the temperature of the current extruder to 190<sup>o</sup>C
+        		//? and return control to the host immediately (''i.e.'' before that
+        		//? temperature has been reached by the extruder). For waiting, see M116.
+        		//?
+        		//? Teacup supports an optional P parameter as a zero-based temperature
+        		//? sensor index to address (e.g. M104 P1 S100 will set the temperature
+        		//? of the heater connected to the second temperature sensor rather
+        		//? than the extruder temperature).
+        		//?
 				if ( ! next_target.seen_S)
 					break;
-        if ( ! next_target.seen_P)
-          #ifdef HEATER_EXTRUDER
-            next_target.P = HEATER_EXTRUDER;
-          #else
-            next_target.P = 0;
-          #endif
-				temp_set(next_target.P, next_target.S);
-				break;
+        		if ( ! next_target.seen_P){
+        		  #ifdef HEATER_EXTRUDER
+        		    next_target.P = HEATER_EXTRUDER;
+        		  #else
+        		    next_target.P = 0;
+        		  #endif
+					temp_set(next_target.P, next_target.S);
+					break;
+				}
 
 			case 105:
-        //? --- M105: Get Temperature(s) ---
+        		//? --- M105: Get Temperature(s) ---
 				//?
 				//? Example: M105
 				//?
-        //? Request the temperature of the current extruder and the build base
-        //? in degrees Celsius. For example, the line sent to the host in
-        //? response to this command looks like
+        		//? Request the temperature of the current extruder and the build base
+        		//? in degrees Celsius. For example, the line sent to the host in
+        		//? response to this command looks like
 				//?
 				//? <tt>ok T:201 B:117</tt>
 				//?
-        //? Teacup supports an optional P parameter as a zero-based temperature
-        //? sensor index to address.
+        		//? Teacup supports an optional P parameter as a zero-based temperature
+        		//? sensor index to address.
 				//?
 				#ifdef ENFORCE_ORDER
 					queue_wait();
 				#endif
+
 				if ( ! next_target.seen_P)
 					next_target.P = TEMP_SENSOR_none;
 				temp_print(next_target.P);
@@ -581,23 +575,25 @@ void process_gcode_command() {
 				//?
 				//? Control the cooling fan (if any).
 				//?
-        //? Teacup supports an optional P parameter as a zero-based heater
-        //? index to address. The heater index can differ from the temperature
-        //? sensor index, see config.h.
-
+        		//? Teacup supports an optional P parameter as a zero-based heater
+        		//? index to address. The heater index can differ from the temperature
+        		//? sensor index, see config.h.
 				#ifdef ENFORCE_ORDER
 					// wait for all moves to complete
 					queue_wait();
 				#endif
-        if ( ! next_target.seen_P)
-          #ifdef HEATER_FAN
-            next_target.P = HEATER_FAN;
-          #else
-            next_target.P = 0;
-          #endif
+
+        		if ( ! next_target.seen_P)
+        		  #ifdef HEATER_FAN
+        		    next_target.P = HEATER_FAN;
+        		  #else
+        		    next_target.P = 0;
+        		  #endif
+						
 				if ( ! next_target.seen_S)
 					break;
-        heater_set(next_target.P, next_target.S);
+
+        		heater_set(next_target.P, next_target.S);
 				break;
 
 			case 110:
@@ -610,45 +606,46 @@ void process_gcode_command() {
 				//?
 				break;
 
-      #ifdef DEBUG
-			case 111:
-				//? --- M111: Set Debug Level ---
-				//?
-				//? Example: M111 S6
-				//?
-				//? Set the level of debugging information transmitted back to the host to level 6.  The level is the OR of three bits:
-				//?
-				//? <Pre>
-				//? #define         DEBUG_PID       1
-				//? #define         DEBUG_DDA       2
-				//? #define         DEBUG_POSITION  4
-				//? </pre>
-				//?
-				//? This command is only available in DEBUG builds of Teacup.
-
-				if ( ! next_target.seen_S)
+      		#ifdef DEBUG
+				case 111:
+					//? --- M111: Set Debug Level ---
+					//?
+					//? Example: M111 S6
+					//?
+					//? Set the level of debugging information transmitted back to the host to level 6.  The level is the OR of three bits:
+					//?
+					//? <Pre>
+					//? #define         DEBUG_PID       1
+					//? #define         DEBUG_DDA       2
+					//? #define         DEBUG_POSITION  4
+					//? </pre>
+					//?
+					//? This command is only available in DEBUG builds of Teacup.
+	
+					if ( ! next_target.seen_S)
+						break;
+					
+					debug_flags = next_target.S;
 					break;
-				debug_flags = next_target.S;
-				break;
-      #endif /* DEBUG */
+      		#endif /* DEBUG */
 
-      case 112:
-        //? --- M112: Emergency Stop ---
-        //?
-        //? Example: M112
-        //?
-        //? Any moves in progress are immediately terminated, then the printer
-        //? shuts down. All motors and heaters are turned off. Only way to
-        //? restart is to press the reset button on the master microcontroller.
-        //? See also M0.
-        //?
-        timer_stop();
-        queue_flush();
-        power_off();
-        cli();
-        for (;;)
-          wd_reset();
-        break;
+      		case 112:
+        		//? --- M112: Emergency Stop ---
+        		//?
+        		//? Example: M112
+        		//?
+        		//? Any moves in progress are immediately terminated, then the printer
+        		//? shuts down. All motors and heaters are turned off. Only way to
+        		//? restart is to press the reset button on the master microcontroller.
+        		//? See also M0.
+        		//?
+        		timer_stop();
+        		queue_flush();
+        		power_off();
+        		cli();
+        		for (;;)
+          		wd_reset();
+        		break;
 
 			case 114:
 				//? --- M114: Get Current Position ---
@@ -669,25 +666,25 @@ void process_gcode_command() {
 				sersendf_P(PSTR("X:%lq,Y:%lq,Z:%lq,E:%lq,F:%lu\n"),
                         current_position.axis[X], current_position.axis[Y],
                         current_position.axis[Z], current_position.axis[E],
-				                current_position.F);
+				        current_position.F);
 
-        if (mb_tail_dda != NULL) {
-          if (DEBUG_POSITION && (debug_flags & DEBUG_POSITION)) {
-            sersendf_P(PSTR("Endpoint: X:%ld,Y:%ld,Z:%ld,E:%ld,F:%lu,c:%lu}\n"),
-                       mb_tail_dda->endpoint.axis[X],
-                       mb_tail_dda->endpoint.axis[Y],
-                       mb_tail_dda->endpoint.axis[Z],
-                       mb_tail_dda->endpoint.axis[E],
-                       mb_tail_dda->endpoint.F,
-                       #ifdef ACCELERATION_REPRAP
-                         mb_tail_dda->end_c
-                       #else
-                         mb_tail_dda->c
-                       #endif
-            );
-          }
-          print_queue();
-        }
+        		if (mb_tail_dda != NULL) {
+          			if (DEBUG_POSITION && (debug_flags & DEBUG_POSITION)) {
+            			sersendf_P(PSTR("Endpoint: X:%ld,Y:%ld,Z:%ld,E:%ld,F:%lu,c:%lu}\n"),
+                       	mb_tail_dda->endpoint.axis[X],
+                       	mb_tail_dda->endpoint.axis[Y],
+                       	mb_tail_dda->endpoint.axis[Z],
+                       	mb_tail_dda->endpoint.axis[E],
+                       	mb_tail_dda->endpoint.F,
+                       	#ifdef ACCELERATION_REPRAP
+                         	mb_tail_dda->end_c
+                       	#else
+                        	mb_tail_dda->c
+                       	#endif
+            			);
+          			}
+          			print_queue();
+        		}
 
 				break;
 
@@ -703,12 +700,12 @@ void process_gcode_command() {
 				//?  FIRMWARE_NAME:Teacup FIRMWARE_URL:http://github.com/traumflug/Teacup_Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 TEMP_SENSOR_COUNT:1 HEATER_COUNT:1
 				//?
 
-        sersendf_P(PSTR("FIRMWARE_NAME:Teacup "
-                        "FIRMWARE_URL:http://github.com/traumflug/Teacup_Firmware/ "
-                        "PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:%d "
-                        "TEMP_SENSOR_COUNT:%d HEATER_COUNT:%d\n"
-                        "cap:AUTOREPORT_TEMP:%d\n"),
-                        1, NUM_TEMP_SENSORS, NUM_HEATERS, 1);
+        		sersendf_P(PSTR("FIRMWARE_NAME:Teacup "
+                    "FIRMWARE_URL:http://github.com/traumflug/Teacup_Firmware/ "
+                    "PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:%d "
+                    "TEMP_SENSOR_COUNT:%d HEATER_COUNT:%d\n"
+                    "cap:AUTOREPORT_TEMP:%d\n"),
+                    1, NUM_TEMP_SENSORS, 1);
 				break;
 
 			case 116:
@@ -717,132 +714,139 @@ void process_gcode_command() {
 				//? Example: M116
 				//?
 				//? Wait for temperatures and other slowly-changing variables to arrive at their set values.
-        temp_set_wait();
+        		temp_set_wait();
 				break;
 
-      case 119:
-        //? --- M119: report endstop status ---
-        //? Report the current status of the endstops configured in the
-        //? firmware to the host.
-        power_on();
-        endstops_on();
-        delay_ms(10); // allow the signal to stabilize
-        {
-          #if ! (defined(X_MIN_PIN) || defined(X_MAX_PIN) || \
-                 defined(Y_MIN_PIN) || defined(Y_MAX_PIN) || \
-                 defined(Z_MIN_PIN) || defined(Z_MAX_PIN))
-            serial_writestr_P(PSTR("No endstops defined."));
-          #else
-            const char* const open = PSTR("open ");
-            const char* const triggered = PSTR("triggered ");
-          #endif
+      		case 119:
+        		//? --- M119: report endstop status ---
+        		//? Report the current status of the endstops configured in the
+        		//? firmware to the host.
+        		power_on();
+        		endstops_on();
+        		delay_ms(10); // allow the signal to stabilize
+        		{
+        			#if ! (defined(X_MIN_PIN) || defined(X_MAX_PIN) || \
+        		        defined(Y_MIN_PIN) || defined(Y_MAX_PIN) || \
+        		        defined(Z_MIN_PIN) || defined(Z_MAX_PIN))
+        		    serial_writestr_P(PSTR("No endstops defined."));
+        		  	#else
+        		    	const char* const open = PSTR("open ");
+        		    	const char* const triggered = PSTR("triggered ");
+        		  	#endif
+		
+		        	#if defined(X_MIN_PIN)
+		        	  serial_writestr_P(PSTR("x_min:"));
+		        	  x_min() ? serial_writestr_P(triggered) : serial_writestr_P(open);
+		        	#endif
+		        	#if defined(X_MAX_PIN)
+		        	  serial_writestr_P(PSTR("x_max:"));
+		        	  x_max() ? serial_writestr_P(triggered) : serial_writestr_P(open);
+		        	#endif
+		        	#if defined(Y_MIN_PIN)
+		        	  serial_writestr_P(PSTR("y_min:"));
+		        	  y_min() ? serial_writestr_P(triggered) : serial_writestr_P(open);
+		        	#endif
+		        	#if defined(Y_MAX_PIN)
+		        	  serial_writestr_P(PSTR("y_max:"));
+		        	  y_max() ? serial_writestr_P(triggered) : serial_writestr_P(open);
+		        	#endif
+		        	#if defined(Z_MIN_PIN)
+		        	  serial_writestr_P(PSTR("z_min:"));
+		        	  z_min() ? serial_writestr_P(triggered) : serial_writestr_P(open);
+		        	#endif
+		        	#if defined(Z_MAX_PIN)
+		        	  serial_writestr_P(PSTR("z_max:"));
+		        	  z_max() ? serial_writestr_P(triggered) : serial_writestr_P(open);
+		        	#endif
+        		}
 
-          #if defined(X_MIN_PIN)
-            serial_writestr_P(PSTR("x_min:"));
-            x_min() ? serial_writestr_P(triggered) : serial_writestr_P(open);
-          #endif
-          #if defined(X_MAX_PIN)
-            serial_writestr_P(PSTR("x_max:"));
-            x_max() ? serial_writestr_P(triggered) : serial_writestr_P(open);
-          #endif
-          #if defined(Y_MIN_PIN)
-            serial_writestr_P(PSTR("y_min:"));
-            y_min() ? serial_writestr_P(triggered) : serial_writestr_P(open);
-          #endif
-          #if defined(Y_MAX_PIN)
-            serial_writestr_P(PSTR("y_max:"));
-            y_max() ? serial_writestr_P(triggered) : serial_writestr_P(open);
-          #endif
-          #if defined(Z_MIN_PIN)
-            serial_writestr_P(PSTR("z_min:"));
-            z_min() ? serial_writestr_P(triggered) : serial_writestr_P(open);
-          #endif
-          #if defined(Z_MAX_PIN)
-            serial_writestr_P(PSTR("z_max:"));
-            z_max() ? serial_writestr_P(triggered) : serial_writestr_P(open);
-          #endif
-        }
-        endstops_off();
-        serial_writechar('\n');
-        break;
+        		endstops_off();
+        		serial_writechar('\n');
+        		break;
 
-      #ifdef EECONFIG
-			case 130:
-				//? --- M130: heater P factor ---
-				//? Undocumented.
-			  	//  P factor in counts per degreeC of error
-        if ( ! next_target.seen_P)
-          #ifdef HEATER_EXTRUDER
-            next_target.P = HEATER_EXTRUDER;
-          #else
-            next_target.P = 0;
-          #endif
-				if (next_target.seen_S)
-					pid_set_p(next_target.P, next_target.S);
-				break;
+      		#ifdef EECONFIG
+				case 130:
+					//? --- M130: heater P factor ---
+					//? Undocumented.
+			  		//  P factor in counts per degreeC of error
+        			if ( ! next_target.seen_P){
+          				#ifdef HEATER_EXTRUDER
+            				next_target.P = HEATER_EXTRUDER;
+         				 #else
+            				next_target.P = 0;
+          				#endif
+            		}
 
-			case 131:
-				//? --- M131: heater I factor ---
-				//? Undocumented.
-			  	// I factor in counts per C*s of integrated error
-        if ( ! next_target.seen_P)
-          #ifdef HEATER_EXTRUDER
-            next_target.P = HEATER_EXTRUDER;
-          #else
-            next_target.P = 0;
-          #endif
-				if (next_target.seen_S)
-					pid_set_i(next_target.P, next_target.S);
-				break;
+					if (next_target.seen_S)
+						pid_set_p(next_target.P, next_target.S);
+					
+					break;
 
-			case 132:
-				//? --- M132: heater D factor ---
-				//? Undocumented.
-			  	// D factor in counts per degreesC/second
-        if ( ! next_target.seen_P)
-          #ifdef HEATER_EXTRUDER
-            next_target.P = HEATER_EXTRUDER;
-          #else
-            next_target.P = 0;
-          #endif
-				if (next_target.seen_S)
-					pid_set_d(next_target.P, next_target.S);
-				break;
+				case 131:
+					//? --- M131: heater I factor ---
+					//? Undocumented.
+				  	// I factor in counts per C*s of integrated error
+        			if ( ! next_target.seen_P)
+          				#ifdef HEATER_EXTRUDER
+            				next_target.P = HEATER_EXTRUDER;
+          				#else
+           					next_target.P = 0;
+          				#endif
+					if (next_target.seen_S)
+						pid_set_i(next_target.P, next_target.S);
+					break;
 
-			case 133:
-				//? --- M133: heater I limit ---
-				//? Undocumented.
-        if ( ! next_target.seen_P)
-          #ifdef HEATER_EXTRUDER
-            next_target.P = HEATER_EXTRUDER;
-          #else
-            next_target.P = 0;
-          #endif
-				if (next_target.seen_S)
-					pid_set_i_limit(next_target.P, next_target.S);
-				break;
+				case 132:
+					//? --- M132: heater D factor ---
+					//? Undocumented.
+				  	// D factor in counts per degreesC/second
+       				if ( ! next_target.seen_P)
+          				#ifdef HEATER_EXTRUDER
+            				next_target.P = HEATER_EXTRUDER;
+          				#else
+           					next_target.P = 0;
+          				#endif
 
-			case 134:
-				//? --- M134: save PID settings to eeprom ---
-				//? Undocumented.
-				heater_save_settings();
-				break;
-      #endif /* EECONFIG */
+					if (next_target.seen_S)
+						pid_set_d(next_target.P, next_target.S);
+					break;
 
-      #ifdef DEBUG
-			case 136:
-				//? --- M136: PRINT PID settings to host ---
-				//? Undocumented.
-				//? This comand is only available in DEBUG builds.
-        if ( ! next_target.seen_P)
-          #ifdef HEATER_EXTRUDER
-            next_target.P = HEATER_EXTRUDER;
-          #else
-            next_target.P = 0;
-          #endif
-				heater_print(next_target.P);
-				break;
-      #endif /* DEBUG */
+				case 133:
+					//? --- M133: heater I limit ---
+					//? Undocumented.
+        			if ( ! next_target.seen_P)
+          				#ifdef HEATER_EXTRUDER
+            				next_target.P = HEATER_EXTRUDER;
+          				#else
+            				next_target.P = 0;
+          				#endif
+
+					if (next_target.seen_S)
+						pid_set_i_limit(next_target.P, next_target.S);
+					break;
+
+				case 134:
+					//? --- M134: save PID settings to eeprom ---
+					//? Undocumented.
+					heater_save_settings();
+					break;
+      		#endif /* EECONFIG */
+
+      		#ifdef DEBUG
+				case 136:
+					//? --- M136: PRINT PID settings to host ---
+					//? Undocumented.
+					//? This comand is only available in DEBUG builds.
+        			if ( ! next_target.seen_P)
+        			  #ifdef HEATER_EXTRUDER
+        			    next_target.P = HEATER_EXTRUDER;
+        			  #else
+        			    next_target.P = 0;
+        			  #endif
+						
+					heater_print(next_target.P);
+					break;
+      		#endif /* DEBUG */
 
 			case 140:
 				//? --- M140: Set heated bed temperature ---
@@ -854,110 +858,113 @@ void process_gcode_command() {
 				#endif
 				break;
 
-      case 155:
-        //? --- M155: Report Temperature(s) Periodically ---
-        //?
-        //? Example: M155 Sn
-        //?
-        //? turns on periodic reporting of the temperatures of the current
-        //? extruder and the build base in degrees Celsius. The reporting
-        //? interval is given in seconds as the S parameter. Use S0 to disable
-        //? periodic temperature reporting. The reporting format is the same
-        //? as for M105, except there is no "ok" at the start of each report.
-        //? For example, the line sent to the host periodically looks like
-        //?
-        //? <tt>T:201 B:117</tt>
-        //?
-        //? Teacup supports an optional P parameter as a zero-based temperature
-        //? sensor index to address.
-        //?
+      		case 155:
+        		//? --- M155: Report Temperature(s) Periodically ---
+        		//?
+        		//? Example: M155 Sn
+        		//?
+        		//? turns on periodic reporting of the temperatures of the current
+        		//? extruder and the build base in degrees Celsius. The reporting
+        		//? interval is given in seconds as the S parameter. Use S0 to disable
+        		//? periodic temperature reporting. The reporting format is the same
+        		//? as for M105, except there is no "ok" at the start of each report.
+        		//? For example, the line sent to the host periodically looks like
+        		//?
+        		//? <tt>T:201 B:117</tt>
+        		//?
+        		//? Teacup supports an optional P parameter as a zero-based temperature
+        		//? sensor index to address.
+        		//?
 
-        // S<period-seconds> is required
-        if ( ! next_target.seen_S)
-          break;
-        #ifdef ENFORCE_ORDER
-          queue_wait();
-        #endif
-        if ( ! next_target.seen_P)
-          next_target.P = TEMP_SENSOR_none;
-        temp_periodic_config(next_target.S, next_target.P);
-        break;
+        		// S<period-seconds> is required
+        		if ( ! next_target.seen_S)
+        		  break;
+        		#ifdef ENFORCE_ORDER
+        		  queue_wait();
+        		#endif
+        		if ( ! next_target.seen_P)
+        		  next_target.P = TEMP_SENSOR_none;
+        		temp_periodic_config(next_target.S, next_target.P);
+        		break;
 
-      case 220:
-        //? --- M220: Set speed factor override percentage ---
-        if ( ! next_target.seen_S)
-          break;
-        // Scale 100% = 256
-        next_target.target.f_multiplier = (next_target.S * 64 + 12) / 25;
-        break;
+      		case 220:
+        		//? --- M220: Set speed factor override percentage ---
+        		if ( ! next_target.seen_S)
+        		  break;
+        		// Scale 100% = 256
+        		next_target.target.f_multiplier = (next_target.S * 64 + 12) / 25;
+        		break;
 
-      case 221:
-        //? --- M221: Control the extruders flow ---
-        if ( ! next_target.seen_S)
-          break;
-        // Scale 100% = 256
-        next_target.target.e_multiplier = (next_target.S * 64 + 12) / 25;
-        break;
+      		case 221:
+      		  	//? --- M221: Control the extruders flow ---
+      			if ( ! next_target.seen_S)
+      		    	break;
+      		  	// Scale 100% = 256
+      		  	next_target.target.e_multiplier = (next_target.S * 64 + 12) / 25;
+      		  	break;
 
-      #ifdef DEBUG
+      		#ifdef DEBUG
+				case 240:
+					//? --- M240: echo off ---
+					//? Disable echo.
+					//? This command is only available in DEBUG builds.
+					debug_flags &= ~DEBUG_ECHO;
+					serial_writestr_P(PSTR("Echo off\n"));
+					break;
+		
+				case 241:
+					//? --- M241: echo on ---
+					//? Enable echo.
+					//? This command is only available in DEBUG builds.
+					debug_flags |= DEBUG_ECHO;
+					serial_writestr_P(PSTR("Echo on\n"));
+					break;
+      		#endif /* DEBUG */
+
+
 			case 240:
-				//? --- M240: echo off ---
-				//? Disable echo.
-				//? This command is only available in DEBUG builds.
-				debug_flags &= ~DEBUG_ECHO;
-				serial_writestr_P(PSTR("Echo off\n"));
+
+				if (next_target.seen_S){
+					strip = next_target.S;
+					while(last_inkjet + 800 > micros());
+
+					for(uint8_t i = 0; i <= 11; i++){
+	
+	              		//See if nozzle is set to fire
+	              		if(strip & 1<<i){
+
+                			//Write the nozzle number to the pin shield as 4 bits
+                			if(i & 1<<0)
+                			  	WRITE(INK_PINA, 1);
+                			if(i & 1<<1)
+                			  	WRITE(INK_PINB, 1);
+                			if(i & 1<<2)
+                			  	WRITE(INK_PINC, 1);
+                			if(i & 1<<3)
+                			  	WRITE(INK_PIND, 1);
+	
+	                		//Fire the Nozzle
+	                		WRITE(INK_PULSE, 1);
+			
+			                delay_us(5);
+			
+			                //Set everything low
+			               	WRITE(INK_PULSE, 0);
+			
+			                WRITE(INK_PINA, 0);
+			                WRITE(INK_PINB, 0);
+			                WRITE(INK_PINC, 0);
+	                		WRITE(INK_PIND, 0);
+              			}
+
+              			last_inkjet = micros();
+					}
+				}
+
 				break;
 
-			case 241:
-				//? --- M241: echo on ---
-				//? Enable echo.
-				//? This command is only available in DEBUG builds.
-				debug_flags |= DEBUG_ECHO;
-				serial_writestr_P(PSTR("Echo on\n"));
-				break;
-      #endif /* DEBUG */
 
-
-		case 700:
-
-			if (next_target.seen_S){
-				
-				strip = next_target.S
-
-				while(last_inkjet + 800 > micros());
-
-				for(uint8_t i = 0; i <= 11; i++){
-
-              		//See if nozzle is set to fire
-              		if(strip & 1<<i){
-
-                	//Write the nozzle number to the pin shield as 4 bits
-                	if(i & 1<<0)
-                  		WRITE(INK_PINA, 1);
-                	if(i & 1<<1)
-                  		WRITE(INK_PINB, 1);
-                	if(i & 1<<2)
-                  		WRITE(INK_PINC, 1);
-                	if(i & 1<<3)
-                  		WRITE(INK_PIND, 1);
-
-                	//Fire the Nozzle
-                	digitalWrite(INK_PULSE, HIGH);
-                	delayMicroseconds(5);
-                	//Set everything low
-                	digitalWrite(INK_PULSE, LOW);
-
-                	WRITE(INK_PINA, 0);
-                	WRITE(INK_PINB, 0);
-                	WRITE(INK_PINC, 0);
-                	WRITE(INK_PIND, 0);
-              	}
-              	
-              	last_inkjet = micros();
-			}
-
-
-				// unknown mcode: spit an error
+			// unknown mcode: spit an error
 			default:
 				sersendf_P(PSTR("E: Bad M-code %d\n"), next_target.M);
 		} // switch (next_target.M)

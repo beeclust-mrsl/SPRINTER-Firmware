@@ -13,14 +13,14 @@
 
 #if defined TEACUP_C_INCLUDE && (defined __AVR__ || defined SIMULATOR)
 
-#include	"config_wrapper.h"
+#include "config_wrapper.h"
 #include "pinio.h"
 #include "clock.h"
 #include "cpu.h"
 #include "memory_barrier.h"
 
 #ifdef	MOTHERBOARD
-#include	"dda_queue.h"
+#include "dda_queue.h"
 #endif
 
 

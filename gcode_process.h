@@ -2,6 +2,7 @@
 #define	_GCODE_PROCESS_H
 
 #include	"gcode_parse.h"
+#include	"arduino.h"
 
 
 // the current tool

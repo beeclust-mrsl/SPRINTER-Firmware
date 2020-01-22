@@ -41,12 +41,6 @@
                      SREG = save_reg; \
                    }
 
-#elif defined __ARMEL__
-
-  #define ATOMIC_START cli();
-  #define ATOMIC_END sei();
-  #define MEMORY_BARRIER()
-
 #elif defined SIMULATOR
 
   #define CLI_SEI_BUG_MEMORY_BARRIER()

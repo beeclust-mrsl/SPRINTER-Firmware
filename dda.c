@@ -21,12 +21,7 @@
 #include "pinio.h"
 #include "memory_barrier.h"
 #include "home.h"
-#include "bed_leveling.h"
 //#include "graycode.c"
-
-#ifdef DC_EXTRUDER
-  #include "heater.h"
-#endif
 
 /*
   position tracking

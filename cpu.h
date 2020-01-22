@@ -6,14 +6,6 @@
 
   #include <avr/interrupt.h>
 
-#elif defined __ARM_LPC1114__
-
-  #include "cmsis-lpc11xx.h"  // For __ASM().
-
-#elif defined __ARM_STM32__
-
-  #include "cmsis-stm32f4xx.h"  // For __ASM().
-
 #endif
 
 #if defined __ARMEL__

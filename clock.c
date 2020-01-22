@@ -11,12 +11,7 @@
 #include	"watchdog.h"
 #include	"timer.h"
 #include	"debug.h"
-#include	"heater.h"
 #include	"serial.h"
-#include "display.h"
-#ifdef	TEMP_INTERCOM
-	#include	"intercom.h"
-#endif
 #include	"memory_barrier.h"
 
 /**
@@ -73,39 +68,7 @@ void clock_tick(void) {
 */
 static void clock_250ms(void) {
 
-  if (heaters_all_zero()) {
-    if (psu_timeout > (30 * 4)) {
-      power_off();
-    }
-    else {
-      ATOMIC_START
-        psu_timeout++;
-      ATOMIC_END
-    }
-  }
-
-  temp_heater_tick();
-
   ifclock(clock_flag_1s) {
-    static uint8_t wait_for_temp = 0;
-
-    #ifdef DISPLAY
-      display_clock();
-    #endif
-
-    temp_residency_tick();
-    temp_periodic_print();
-
-    if (temp_waiting()) {
-      serial_writestr_P(PSTR("Waiting for target temp\n"));
-      wait_for_temp = 1;
-    }
-    else {
-      if (wait_for_temp) {
-        serial_writestr_P(PSTR("Temp achieved\n"));
-        wait_for_temp = 0;
-      }
-    }
 
     if (DEBUG_POSITION && (debug_flags & DEBUG_POSITION)) {
       // current position
@@ -130,9 +93,6 @@ static void clock_250ms(void) {
       serial_writechar('\n');
     }
   }
-  #ifdef  TEMP_INTERCOM
-  start_send();
-  #endif
 }
 
 /*! do stuff every 10 milliseconds
@@ -142,10 +102,6 @@ static void clock_250ms(void) {
 static void clock_10ms(void) {
 	// reset watchdog
 	wd_reset();
-
-	temp_sensor_tick();
-
-  soft_pwm_tick();
 
 	ifclock(clock_flag_250ms) {
 		clock_250ms();
@@ -163,12 +119,7 @@ void clock() {
 	ifclock(clock_flag_10ms) {
 		clock_10ms();
 	}
-
-  #ifdef DISPLAY
-    display_tick();
+  #ifdef SIMULATOR
+    sim_time_warp();
   #endif
-
-#ifdef SIMULATOR
-  sim_time_warp();
-#endif
 }
