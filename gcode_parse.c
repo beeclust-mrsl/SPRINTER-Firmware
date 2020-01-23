@@ -150,14 +150,6 @@ uint8_t gcode_parse_char(uint8_t c) {
 					break;
 				case 'M':
 					next_target.M = read_digit.mantissa;
-          #ifdef SD
-            if (next_target.M == 23) {
-              // SD card command with a filename.
-              next_target.read_string = 1;  // Reset by string handler or EOL.
-              str_buf_ptr = 0;
-              last_field = 0;
-            }
-          #endif
 					if (DEBUG_ECHO && (debug_flags & DEBUG_ECHO))
 						serwrite_uint8(next_target.M);
 					break;
@@ -421,22 +413,7 @@ uint8_t gcode_parse_char(uint8_t c) {
 
     return 1;
 	}
-
-  #ifdef SD
-  // Handle string reading. After checking for EOL.
-  if (next_target.read_string) {
-    if (c == ' ') {
-      if (str_buf_ptr)
-        next_target.read_string = 0;
-    }
-    else if (str_buf_ptr < STR_BUF_LEN) {
-      gcode_str_buf[str_buf_ptr] = c;
-      str_buf_ptr++;
-      gcode_str_buf[str_buf_ptr] = '\0';
-    }
-  }
-  #endif /* SD */
-
+  
   return 0;
 }
 
