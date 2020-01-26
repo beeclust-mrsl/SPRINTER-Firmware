@@ -18,11 +18,9 @@
 
 
 void timer_init(void);
-
 uint8_t timer_set(int32_t delay, uint8_t check_short);
-
 void timer_reset(void);
-
 void timer_stop(void);
+unsigned long micros(void);
 
 #endif	/* _TIMER_H */

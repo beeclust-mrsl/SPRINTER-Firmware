@@ -330,8 +330,6 @@ void process_gcode_command() {
 		}
 	}
 	else if (next_target.seen_M) {
-		uint8_t i;
-
 		switch (next_target.M) {
 			case 0:
 				//? --- M0: machine stop ---
