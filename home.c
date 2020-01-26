@@ -205,6 +205,6 @@ void set_axis_home_position(enum axis_e n, int8_t dir) {
   startpoint.axis[n] = next_target.target.axis[n] = home_position;
   if (n == Z) {
     // Compensate for z-offset that will be added in by next move
-    startpoint.axis[n] -= bed_level_offset(startpoint.axis);
+    startpoint.axis[n] -= 0;
   }
 }

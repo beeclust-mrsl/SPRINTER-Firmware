@@ -32,13 +32,13 @@ carthesian_to_corexy(const TARGET *startpoint, const TARGET *target,
 void axes_um_to_steps_cartesian(const axes_int32_t um, axes_int32_t steps) {
   steps[X] = um_to_steps(um[X], X);
   steps[Y] = um_to_steps(um[Y], Y);
-  steps[Z] = um_to_steps(um[Z] + bed_level_offset(um), Z);
+  steps[Z] = um_to_steps(um[Z], Z);
 }
 
 void axes_um_to_steps_corexy(const axes_int32_t um, axes_int32_t steps) {
   steps[X] = um_to_steps(um[X] + um[Y], X);
   steps[Y] = um_to_steps(um[X] - um[Y], Y);
-  steps[Z] = um_to_steps(um[Z] + bed_level_offset(um), Z);
+  steps[Z] = um_to_steps(um[Z], Z);
 }
 
 void delta_to_axes_cartesian(axes_int32_t delta) {

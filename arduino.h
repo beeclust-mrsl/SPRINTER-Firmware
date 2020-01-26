@@ -45,38 +45,6 @@
 	#include	"arduino_168_328p.h"
 #endif
 
-#if defined (__AVR_ATmega644__) || defined (__AVR_ATmega644P__) || \
-    defined (__AVR_ATmega644PA__) || defined (__AVR_ATmega1284__) || \
-    defined (__AVR_ATmega1284P__)
-	#include	"arduino_644.h"
-#endif
-
-#if defined (__AVR_ATmega1280__) || defined (__AVR_ATmega2560__)
-	#include	"arduino_1280.h"
-#endif
-
-#if defined (__AVR_AT90USB1286__)
-  #include "arduino_usb1286.h"
-#endif
-
-#if defined (__AVR_AT90USB1287__)
-  #include "arduino_usb1287.h"
-#endif
-
-#if defined (__AVR_ATmega32U4__)
-	#include    "arduino_32U4.h"
-#endif
-
-#elif defined __ARMEL__
-
-  #if defined (__ARM_LPC1114__)
-    #include "arduino_lpc1114.h"
-  #endif
-
-  #if defined (__ARM_STM32__)
-    #include "arduino_stm32f411.h"
-  #endif
-
 #endif /* __AVR__, __ARMEL__, SIMULATOR */
 
 #ifndef SIMULATOR

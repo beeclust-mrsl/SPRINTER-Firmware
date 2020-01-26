@@ -110,7 +110,7 @@ void dda_init(void) {
 */
 void dda_new_startpoint() {
   if (DEBUG_DDA && (debug_flags & DEBUG_DDA)) {
-    int32_t z_offset = bed_level_offset(startpoint.axis);
+    int32_t z_offset = NULL;
     sersendf_P(PSTR("\nReset: X %lq  Y %lq  Z %lq  Zofs %lq  F %lu\n"),
                startpoint.axis[X], startpoint.axis[Y],
                startpoint.axis[Z], z_offset, startpoint.F);
@@ -961,7 +961,6 @@ void update_current_position() {
     }
 
     // Compensate for bed-leveling z-offset
-    current_position.axis[Z] -= bed_level_offset(current_position.axis);
 
     current_position.F = dda->endpoint.F;
   }

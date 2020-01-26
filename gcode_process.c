@@ -8,7 +8,7 @@
 
 #include	"gcode_parse.h"
 
-#include "cpu.h"
+#include 	"cpu.h"
 #include	"dda.h"
 #include	"dda_queue.h"
 #include	"watchdog.h"
@@ -21,6 +21,7 @@
 #include	"clock.h"
 #include	"config_wrapper.h"
 #include	"home.h"
+#include	"Arduino.h"
 
 /// the current tool
 uint8_t tool;
