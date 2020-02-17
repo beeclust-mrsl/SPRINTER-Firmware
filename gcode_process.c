@@ -25,6 +25,7 @@
 
 /// the current tool
 uint8_t tool;
+uint8_t led;
 
 /// the tool to be changed when we get an M6
 uint8_t next_tool;
@@ -552,6 +553,19 @@ void process_gcode_command() {
 
               			last_inkjet = micros();
 					}
+				}
+
+				break;
+
+			case 250:
+
+				if (next_target.seen_S){
+					led = next_target.S;
+
+					if(led == 0)
+						WRITE(LED_DEBUG, 0);
+					else if(led == 1)
+						WRITE(LED_DEBUG, 1);
 				}
 
 				break;

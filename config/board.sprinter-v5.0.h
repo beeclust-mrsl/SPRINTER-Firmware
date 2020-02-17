@@ -66,6 +66,7 @@
 #define INK_PIND AIO3
 
 #define INK_PULSE DIO6
+#define LED_DEBUG DIO7
 
 /***************************************************************************\
 *                                                                           *
