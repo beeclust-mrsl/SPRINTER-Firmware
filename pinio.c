@@ -11,6 +11,12 @@ volatile uint8_t	psu_timeout = 0;
   This sets pins as input or output, appropriate for their usage.
 */
 void pinio_init(void) {
+
+  //Debug LED
+
+  SET_OUTPUT(LED_DEBUG);
+  WRITE(LED_DEBUG, 0);
+
   /// X Stepper.
   SET_OUTPUT(X_STEP_PIN); WRITE(X_STEP_PIN, 0);
   SET_OUTPUT(X_DIR_PIN); WRITE(X_DIR_PIN, 0);

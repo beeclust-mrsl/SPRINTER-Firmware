@@ -497,23 +497,23 @@ void process_gcode_command() {
         		break;
 
 
-      		#ifdef DEBUG
-				case 240:
-					//? --- M240: echo off ---
-					//? Disable echo.
-					//? This command is only available in DEBUG builds.
-					debug_flags &= ~DEBUG_ECHO;
-					serial_writestr_P(PSTR("Echo off\n"));
-					break;
+    //   		#ifdef DEBUG
+				// case 240:
+				// 	//? --- M240: echo off ---
+				// 	//? Disable echo.
+				// 	//? This command is only available in DEBUG builds.
+				// 	debug_flags &= ~DEBUG_ECHO;
+				// 	serial_writestr_P(PSTR("Echo off\n"));
+				// 	break;
 		
-				case 241:
-					//? --- M241: echo on ---
-					//? Enable echo.
-					//? This command is only available in DEBUG builds.
-					debug_flags |= DEBUG_ECHO;
-					serial_writestr_P(PSTR("Echo on\n"));
-					break;
-      		#endif /* DEBUG */
+				// case 241:
+				// 	//? --- M241: echo on ---
+				// 	//? Enable echo.
+				// 	//? This command is only available in DEBUG builds.
+				// 	debug_flags |= DEBUG_ECHO;
+				// 	serial_writestr_P(PSTR("Echo on\n"));
+				// 	break;
+    //   		#endif /* DEBUG */
 
 
 			case 240:
