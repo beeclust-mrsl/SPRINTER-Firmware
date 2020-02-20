@@ -35,10 +35,9 @@ uint32_t	next_step_time;
 uint32_t	step_extra_time = 0;
 #endif /* ACCELERATION_TEMPORAL */
 
-/*********************************
-	ADDED BY KEDAR
-*********************************/
-#define MICROSECONDS_PER_TIMER0_OVERFLOW ((64 * 256)/(F_CPU / 1000000L))
+#define clockCyclesPerMicrosecond() (F_CPU / 1000000L)
+#define clockCyclesToMicroseconds(a) ((a) / clockCyclesPerMicrosecond())
+#define MICROSECONDS_PER_TIMER0_OVERFLOW (clockCyclesToMicroseconds(64 * 256))
 #define MILLIS_INC (MICROSECONDS_PER_TIMER0_OVERFLOW / 1000)
 #define FRACT_INC ((MICROSECONDS_PER_TIMER0_OVERFLOW % 1000) >> 3)
 #define FRACT_MAX (1000 >> 3)
@@ -46,9 +45,6 @@ uint32_t	step_extra_time = 0;
 volatile unsigned long timer0_overflow_count = 0;
 volatile unsigned long timer0_millis = 0;
 static unsigned char timer0_fract = 0;
-/*********************************
-	ADDED BY KEDAR
-*********************************/
 
 /** System clock interrupt.
 
@@ -116,9 +112,7 @@ ISR(TIMER1_COMPA_vect) {
 	// leave OCR1A as it was
 }
 
-/*********************************
-	ADDED BY KEDAR
-*********************************/
+
 ISR(TIMER0_OVF_vect){
 	unsigned long m = timer0_millis;
 	unsigned char f = timer0_fract;
@@ -134,9 +128,6 @@ ISR(TIMER0_OVF_vect){
 	timer0_millis = m;
 	timer0_overflow_count++;
 }
-/*********************************
-	ADDED BY KEDAR
-*********************************/
 
 
 #endif /* ifdef MOTHERBOARD */
@@ -155,6 +146,10 @@ void timer_init() {
 	OCR1B = TICK_TIME & 0xFFFF;
 	// enable interrupt
 	TIMSK1 = MASK(OCIE1B);
+
+	TCCR0B = MASK(CS01)|MASK(CS00);
+	TIMSK0 = MASK(TOIE0);
+
 #ifdef SIMULATOR
   // Tell simulator
   sim_timer_set();
@@ -280,27 +275,22 @@ void timer_stop() {
 
 }
 
-/*********************************
-	ADDED BY KEDAR
-*********************************/
 unsigned long micros() {
-	unsigned long m;
-	uint8_t oldSREG = SREG, t;
-	
-	cli();
-	
-	t = TCNT0;
+    unsigned long m;
+    uint8_t oldSREG = SREG, t;
+     
+    cli();
+    m = timer0_overflow_count;
+    t = TCNT0;
 
-	if ((TIFR0 & _BV(TOV0)) && (t < 255))
-		m++;
-
-	SREG = oldSREG;
-	
-	return ((m << 8) + t) * (64 / ( F_CPU / 1000000L ));
+    if ((TIFR0 & _BV(TOV0)) && (t & 255))
+        m++;
+ 
+    SREG = oldSREG;
+     
+    return ((m << 8) + t) * (64 / clockCyclesPerMicrosecond());
 }
-/*********************************
-	ADDED BY KEDAR
-*********************************/
+
 
 #endif /* ifdef MOTHERBOARD */
 
