@@ -552,7 +552,6 @@ void process_gcode_command() {
               			}
 
               			last_inkjet = micros();
-              			sersendf_P(PSTR("%lu\n"), micros());
 					}
 				}
 
