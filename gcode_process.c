@@ -483,9 +483,9 @@ void process_gcode_command() {
 				//?  FIRMWARE_NAME:Teacup FIRMWARE_URL:http://github.com/traumflug/Teacup_Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 TEMP_SENSOR_COUNT:1 HEATER_COUNT:1
 				//?
 
-        		sersendf_P(PSTR("FIRMWARE_NAME:SPRINTER-Firmware "
-                    "FIRMWARE_URL:http://github.com/Beeclust-MRSL/SPRINTER-Firmware"
-                    "PROTOCOL_VERSION:1.0 MACHINE_TYPE: SPRINTER V5.0"));
+        		sersendf_P(PSTR("FIRMWARE_NAME:SPRINTER-Firmware\n"
+                    "FIRMWARE_URL:http://github.com/Beeclust-MRSL/SPRINTER-Firmware\n"
+                    "PROTOCOL_VERSION:1.0 \nMACHINE_TYPE: SPRINTER V5.0\n"));
 				break;
 
       		case 220:

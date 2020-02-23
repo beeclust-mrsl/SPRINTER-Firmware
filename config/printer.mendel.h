@@ -32,8 +32,8 @@
 
     Valid range: 20 to 4'0960'000 (0.02 to 40960 steps/mm)
 */
-#define STEPS_PER_M_X            40000
-#define STEPS_PER_M_Y            40000
+#define STEPS_PER_M_X            166396
+#define STEPS_PER_M_Y            166396
 #define STEPS_PER_M_Z            320000
 #define STEPS_PER_M_E            96271
 
@@ -145,7 +145,7 @@ DEFINE_HOMING(x_negative, y_negative, z_negative)
     Units: mm/s^2
     Useful range: 1 to 10'000
 */
-#define ACCELERATION             1000
+#define ACCELERATION             10
 
 /** \def LOOKAHEAD
   Define this to enable look-ahead during *ramping* acceleration to smoothly
