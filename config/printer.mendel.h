@@ -176,8 +176,8 @@ DEFINE_HOMING(x_negative, y_negative, z_negative)
     Sane values: 0 to 400
     Valid range: 0 to 65535
 */
-#define MAX_JERK_X               200
-#define MAX_JERK_Y               200
+#define MAX_JERK_X               10
+#define MAX_JERK_Y               10
 #define MAX_JERK_Z               20
 #define MAX_JERK_E               200
 
